@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PM Group 조직도</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;900&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #0a0e1a;
+    --bg-secondary: #111827;
+    --bg-card: rgba(255,255,255,0.03);
+    --bg-card-hover: rgba(255,255,255,0.06);
+    --border-subtle: rgba(255,255,255,0.06);
+    --border-accent: rgba(99,171,255,0.3);
+    --text-primary: #f0f4ff;
+    --text-secondary: rgba(255,255,255,0.55);
+    --text-muted: rgba(255,255,255,0.3);
+    --accent-blue: #63abff;
+    --accent-cyan: #67e8f9;
+    --accent-violet: #a78bfa;
+    --accent-rose: #fb7185;
+    --accent-amber: #fbbf24;
+    --accent-emerald: #34d399;
+    --glow-blue: rgba(99,171,255,0.15);
+    --glow-cyan: rgba(103,232,249,0.12);
+    --team-apps: #63abff;
+    --team-link: #a78bfa;
+    --team-scan: #34d399;
+    --team-writing: #fbbf24;
+    --team-ux: #fb7185;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans KR', 'Outfit', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Ambient background */
+  .bg-ambient {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .bg-ambient::before {
+    content: '';
+    position: absolute;
+    width: 800px; height: 800px;
+    top: -200px; left: -100px;
+    background: radial-gradient(circle, rgba(99,171,255,0.07) 0%, transparent 70%);
+    animation: drift1 20s ease-in-out infinite;
+  }
+  .bg-ambient::after {
+    content: '';
+    position: absolute;
+    width: 600px; height: 600px;
+    bottom: -100px; right: -100px;
+    background: radial-gradient(circle, rgba(167,139,250,0.06) 0%, transparent 70%);
+    animation: drift2 25s ease-in-out infinite;
+  }
+  @keyframes drift1 {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(80px, 40px); }
+  }
+  @keyframes drift2 {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(-60px, -30px); }
+  }
+
+  /* Noise overlay */
+  .noise {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 256px;
+  }
+
+  .container {
+    position: relative;
+    z-index: 2;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 60px 40px 80px;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 70px;
+    animation: fadeUp 0.8s ease-out;
+  }
+  .header-label {
+    font-family: 'Outfit', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--accent-cyan);
+    margin-bottom: 16px;
+    opacity: 0.8;
+  }
+  .header-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 42px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    background: linear-gradient(135deg, #f0f4ff 0%, var(--accent-blue) 50%, var(--accent-cyan) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+  }
+  .header-subtitle {
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-weight: 300;
+  }
+
+  /* Group Head */
+  .group-head {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 36px;
+    animation: fadeUp 0.8s ease-out 0.15s both;
+  }
+  .head-card {
+    position: relative;
+    padding: 20px 40px;
+    background: linear-gradient(135deg, rgba(99,171,255,0.1), rgba(103,232,249,0.05));
+    border: 1px solid rgba(99,171,255,0.2);
+    border-radius: 20px;
+    text-align: center;
+    backdrop-filter: blur(20px);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .head-card::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 21px;
+    background: linear-gradient(135deg, rgba(99,171,255,0.3), transparent 50%, rgba(103,232,249,0.2));
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .head-card:hover::before { opacity: 1; }
+  .head-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 60px rgba(99,171,255,0.12);
+  }
+  .head-role {
+    font-family: 'Outfit', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent-cyan);
+    margin-bottom: 10px;
+  }
+  .head-name {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+  .head-name-en {
+    font-family: 'Outfit', sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    margin-top: 3px;
+    letter-spacing: 0.5px;
+  }
+  .member-name-en {
+    font-family: 'Outfit', sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--text-muted);
+    margin-top: 1px;
+    letter-spacing: 0.3px;
+  }
+
+  /* Connectors removed */
+
+  /* Teams grid */
+  .teams-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 20px;
+    animation: fadeUp 0.8s ease-out 0.4s both;
+  }
+
+  /* Team card */
+  .team-card {
+    position: relative;
+    border-radius: 18px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .team-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--border-accent);
+    background: var(--bg-card-hover);
+  }
+  .team-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: 18px 18px 0 0;
+  }
+  .team-card[data-team="apps"]::before { background: linear-gradient(90deg, var(--team-apps), rgba(99,171,255,0.3)); }
+  .team-card[data-team="link"]::before { background: linear-gradient(90deg, var(--team-link), rgba(167,139,250,0.3)); }
+  .team-card[data-team="scan"]::before { background: linear-gradient(90deg, var(--team-scan), rgba(52,211,153,0.3)); }
+  .team-card[data-team="writing"]::before { background: linear-gradient(90deg, var(--team-writing), rgba(251,191,36,0.3)); }
+  .team-card[data-team="ux"]::before { background: linear-gradient(90deg, var(--team-ux), rgba(251,113,133,0.3)); }
+
+  .team-card:hover .team-header {
+    background: var(--bg-card-hover);
+  }
+
+  /* Team connector removed */
+
+  /* Team header */
+  .team-header {
+    padding: 20px 20px 16px;
+    text-align: center;
+    transition: background 0.3s;
+    position: relative;
+  }
+  .team-name {
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .team-card[data-team="apps"] .team-name { color: var(--team-apps); }
+  .team-card[data-team="link"] .team-name { color: var(--team-link); }
+  .team-card[data-team="scan"] .team-name { color: var(--team-scan); }
+  .team-card[data-team="writing"] .team-name { color: var(--team-writing); }
+  .team-card[data-team="ux"] .team-name { color: var(--team-ux); }
+
+  .badge-new {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    background: linear-gradient(135deg, var(--accent-rose), #e11d48);
+    color: white;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-radius: 6px;
+    animation: pulse-badge 2s ease-in-out infinite;
+  }
+  @keyframes pulse-badge {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(251,113,133,0.4); }
+    50% { box-shadow: 0 0 12px 2px rgba(251,113,133,0.2); }
+  }
+
+  .team-count {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    font-weight: 400;
+  }
+
+  /* Members list */
+  .members-list {
+    padding: 4px 14px 14px;
+  }
+
+  .member {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    transition: all 0.25s ease;
+    cursor: default;
+  }
+  .member:hover {
+    background: rgba(255,255,255,0.04);
+  }
+
+  .member-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .member-avatar svg {
+    width: 22px;
+    height: 22px;
+    fill: currentColor;
+  }
+  .team-card[data-team="apps"] .member-avatar { background: linear-gradient(135deg, rgba(99,171,255,0.25), rgba(99,171,255,0.1)); color: var(--team-apps); }
+  .team-card[data-team="link"] .member-avatar { background: linear-gradient(135deg, rgba(167,139,250,0.25), rgba(167,139,250,0.1)); color: var(--team-link); }
+  .team-card[data-team="scan"] .member-avatar { background: linear-gradient(135deg, rgba(52,211,153,0.25), rgba(52,211,153,0.1)); color: var(--team-scan); }
+  .team-card[data-team="writing"] .member-avatar { background: linear-gradient(135deg, rgba(251,191,36,0.25), rgba(251,191,36,0.1)); color: var(--team-writing); }
+  .team-card[data-team="ux"] .member-avatar { background: linear-gradient(135deg, rgba(251,113,133,0.25), rgba(251,113,133,0.1)); color: var(--team-ux); }
+
+  .member.is-leader .member-avatar {
+    box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 3.5px currentColor;
+  }
+
+  .member-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .member-name {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.3;
+  }
+  .member.is-leader .member-name {
+    font-weight: 700;
+  }
+  .member-role {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-top: 1px;
+  }
+  .team-card[data-team="apps"] .member-role { color: rgba(99,171,255,0.6); }
+  .team-card[data-team="link"] .member-role { color: rgba(167,139,250,0.6); }
+  .team-card[data-team="scan"] .member-role { color: rgba(52,211,153,0.6); }
+  .team-card[data-team="writing"] .member-role { color: rgba(251,191,36,0.6); }
+  .team-card[data-team="ux"] .member-role { color: rgba(251,113,133,0.6); }
+
+  .member-tag {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    padding: 2px 7px;
+    border-radius: 5px;
+    flex-shrink: 0;
+  }
+  .tag-pl {
+    background: rgba(167,139,250,0.15);
+    color: var(--accent-violet);
+  }
+
+  /* Hiring/backfill row */
+  .member.is-hiring {
+    border: 1px dashed rgba(255,255,255,0.1);
+    border-radius: 12px;
+    margin-top: 4px;
+  }
+  .member.is-hiring .member-avatar {
+    background: rgba(255,255,255,0.04) !important;
+    color: var(--text-muted) !important;
+    border: 1px dashed rgba(255,255,255,0.15);
+  }
+  .member.is-hiring .member-name {
+    color: var(--text-secondary);
+    font-weight: 400;
+    font-size: 12px;
+  }
+  .member.is-hiring .member-sub {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 1px;
+  }
+
+  /* Divider */
+  .member-divider {
+    height: 1px;
+    margin: 4px 12px;
+    background: var(--border-subtle);
+  }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    margin-top: 60px;
+    animation: fadeUp 0.8s ease-out 0.6s both;
+  }
+  .footer-stats {
+    display: inline-flex;
+    gap: 32px;
+    padding: 16px 36px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 14px;
+  }
+  .stat {
+    text-align: center;
+  }
+  .stat-number {
+    font-family: 'Outfit', sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .stat-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .stat-divider {
+    width: 1px;
+    background: var(--border-subtle);
+  }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 20px;
+    animation: fadeUp 0.8s ease-out 0.7s both;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 3px;
+  }
+  .legend-dot.leader {
+    box-shadow: 0 0 0 1.5px var(--bg-primary), 0 0 0 3px var(--text-secondary);
+    background: var(--text-secondary);
+  }
+  .legend-dot.hiring {
+    border: 1.5px dashed var(--text-muted);
+    background: transparent;
+  }
+
+  /* Animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .team-card { animation: fadeUp 0.6s ease-out both; }
+  .team-card:nth-child(1) { animation-delay: 0.4s; }
+  .team-card:nth-child(2) { animation-delay: 0.5s; }
+  .team-card:nth-child(3) { animation-delay: 0.6s; }
+  .team-card:nth-child(4) { animation-delay: 0.7s; }
+  .team-card:nth-child(5) { animation-delay: 0.8s; }
+
+  /* Responsive */
+  @media (max-width: 1200px) {
+    .teams-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    .connector-horizontal { width: 60%; }
+  }
+  @media (max-width: 768px) {
+    .container { padding: 40px 20px; }
+    .teams-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    .header-title { font-size: 30px; }
+    .connector-horizontal-wrap,
+    .connector-main { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden">
+  <!-- Female: head + wide A-line skirt -->
+  <symbol id="ico-f" viewBox="0 0 40 40">
+    <circle cx="20" cy="9" r="5.5"/>
+    <path d="M15 17h10l5 19H10z"/>
+  </symbol>
+  <!-- Male: head + body + separate legs -->
+  <symbol id="ico-m" viewBox="0 0 40 40">
+    <circle cx="20" cy="9" r="5.5"/>
+    <path d="M15 17h10v10h-2l-1.5 9h-3L17 27h-2z"/>
+  </symbol>
+</svg>
+<div class="bg-ambient"></div>
+<div class="noise"></div>
+
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-label">Organization Chart</div>
+    <div class="header-title">PM Group</div>
+    <div class="header-subtitle">Product Management Organization</div>
+  </div>
+
+  <!-- Group Head -->
+  <div class="group-head">
+    <div class="head-card">
+      <div class="head-role">Director</div>
+      <div class="head-name">이정근</div>
+      <div class="head-name-en">Jake Lee</div>
+    </div>
+  </div>
+
+
+  <!-- Teams -->
+  <div class="teams-grid">
+
+    <!-- Apps Product -->
+    <div class="team-card" data-team="apps">
+      <div class="team-header">
+        <div class="team-name">Apps Product</div>
+        <div class="team-count">6 members</div>
+      </div>
+      <div class="members-list">
+        <div class="member is-leader">
+          <div class="member-avatar"><svg><use href="#ico-m"/></svg></div>
+          <div class="member-info">
+            <div class="member-name">김진영</div>
+            <div class="member-role">Leader</div>
+          </div>
+        </div>
+        <div class="member-divider"></div>
+        <div class="member">
+          <div class="member-avatar"><svg><use href="#ico-m"/></svg></div>
+          <div class="member-info"><div class="member-name">김병춘</div></div>
+        </div>
+        <div class="member">
+          <div class="member-avatar"><svg><use href="#ico-m"/></svg></div>
+          <div class="member-info"><div class="member-name">이정택</div></div>
+        </div>
+        <div class="member">
+          <div class="member-avatar"><svg><use href="#ico-f"/></svg></div>
+          <div class="member-info"><div class="member-name">황윤하</div></div>
+        </div>
+        <div class="member">
+          <div class="member-avatar"><svg><use href="#ico-m"/></svg></div>
+          <div class="member-info"><div class="member-name">고기남</div></div>
+        </div>
+        <div class="member">
+          <div class="member-avatar"><svg><use href="#ico-f"/></svg></div>
+          <div class="member-info"><div class="member-name">김예은</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Link Product -->
+    <div class="team-card" data-team="link">
+      <div class="team-header">
+        <div class="team-name">Link Product</div>
+        <div class="team-count">5 members</div>
+      </div>
+      <div class="members-list">
+        <div class="member is-leader">
+          <div class="member-avatar"><svg><use href="#ico-m"/></svg></div>
+          <div class="member-info">
+            <div class="member-name">태희재</div>
+            <div class="member-role">Leader</div>
+          </div>
+        </div>
+        <div class="member-divider"></div>
+        <div class="member">
+          <div class="member-avatar"><svg><use href="#ico-f"/></svg></div>
+          <div class="member-info"><div class="member-name">이희선</div></div>
+          <span class="member-tag tag-pl">PL</span>
+        </div>
+        <div class="member">
+          <div class="member-avatar"><svg><use href="#ico-f"/></svg></div>
+          <div class="member-info"><div class="member-name">이예슬</div></div>
+        </div>
+        <div class="member">
+          <div class="member-avatar"><svg><use href="#ico-f"/></svg></div>
+          <div class="member-info"><div class="member-name">전설아</div></div>
+          <span class="member-tag tag-pl">PL</span>
+        </div>
+        <div class="member">
+          <div class="member-avatar"><svg><use href="#ico-m"/></svg></div>
+          <div class="member-info"><div class="member-name">한동훈</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scan Product -->
+    <div class="team-card" data-team="scan">
+      <div class="team-header">
+        <div class="team-name">Scan Product</div>
+        <div class="team-count">6 members</div>
+      </div>
+      <div class="members-list">
+        <div class="member is-leader">
+          <div class="member-avatar"><svg><use href="#ico-m"/></svg></div>
+          <div class="member-info">
+            <div class="member-name">이동열</div>
+            <div class="member-role">Leader</div>
+          </div>
+        </div>
+        <div class="member-divider"></div>
+        <div class="member">
+          <div class="member-avatar"><svg><use href="#ico-m"/></svg></div>
+          <div class="member-info"><div class="member-name">이상훈</div></div>
+        </div>
+        <div class="member">
+          <div class="member-avatar"><svg><use href="#ico-m"/></svg></div>
+          <div class="member-info"><div class="member-name">이동희</div></div>
+        </div>
+        <div class="member">
+          <div class="member-avatar"><svg><use href="#ico-m"/></svg></div>
+          <div class="member-info"><div class="member-name">전진표</div></div>
+        </div>
+        <div class="member">
+          <div class="member-avatar"><svg><use href="#ico-m"/></svg></div>
+          <div class="member-info"><div class="member-name">이정</div></div>
+        </div>
+        <div class="member">
+          <div class="member-avatar"><svg><use href="#ico-m"/></svg></div>
+          <div class="member-info"><div class="member-name">허진원</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Writing -->
+    <div class="team-card" data-team="writing">
+      <div class="team-header">
+        <div class="team-name">Writing</div>
+        <div class="team-count">4 members</div>
+      </div>
+      <div class="members-list">
+        <div class="member is-leader">
+          <div class="member-avatar"><svg><use href="#ico-f"/></svg></div>
+          <div class="member-info">
+            <div class="member-name">김민정</div>
+            <div class="member-role">Leader</div>
+          </div>
+        </div>
+        <div class="member-divider"></div>
+        <div class="member">
+          <div class="member-avatar"><svg><use href="#ico-m"/></svg></div>
+          <div class="member-info"><div class="member-name">양태규</div></div>
+        </div>
+        <div class="member">
+          <div class="member-avatar"><svg><use href="#ico-f"/></svg></div>
+          <div class="member-info"><div class="member-name">안겔리나</div></div>
+        </div>
+        <div class="member">
+          <div class="member-avatar"><svg><use href="#ico-f"/></svg></div>
+          <div class="member-info"><div class="member-name">김해인</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- UX/UI Design -->
+    <div class="team-card" data-team="ux">
+      <div class="team-header">
+        <div class="team-name">UX/UI Design</div>
+        <div class="team-count">4 members</div>
+      </div>
+      <div class="members-list">
+        <div class="member is-leader">
+          <div class="member-avatar"><svg><use href="#ico-m"/></svg></div>
+          <div class="member-info">
+            <div class="member-name">박인선</div>
+            <div class="member-role">Leader</div>
+          </div>
+        </div>
+        <div class="member-divider"></div>
+        <div class="member">
+          <div class="member-avatar"><svg><use href="#ico-f"/></svg></div>
+          <div class="member-info"><div class="member-name">김은혜</div></div>
+        </div>
+        <div class="member">
+          <div class="member-avatar"><svg><use href="#ico-f"/></svg></div>
+          <div class="member-info"><div class="member-name">최고은</div></div>
+        </div>
+        <div class="member">
+          <div class="member-avatar"><svg><use href="#ico-f"/></svg></div>
+          <div class="member-info"><div class="member-name">김미주</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer Stats -->
+  <div class="footer">
+    <div class="footer-stats">
+      <div class="stat">
+        <div class="stat-number">5</div>
+        <div class="stat-label">Teams</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <div class="stat-number">25</div>
+        <div class="stat-label">Members</div>
+      </div>
+    </div>
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-dot leader"></div>
+        <span>Team Leader</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
